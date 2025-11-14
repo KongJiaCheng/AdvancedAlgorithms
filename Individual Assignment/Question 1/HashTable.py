@@ -5,28 +5,28 @@ from typing import Optional
 # ------------------------------
 class HashTable:
     class Node:
-        def __init__(self, key, value):
+        def __init__(self, key, value): #Constructor(Node)
             self.key = key
             self.value = value
             self.next: Optional['HashTable.Node'] = None
 
-    def __init__(self, capacity=10):
+    def __init__(self, capacity=10): #Constructor(Hash Table)
         self.capacity = capacity
-        self.table: list[Optional['HashTable.Node']] = [None] * capacity  # FIXED TYPE
+        self.table: list[Optional['HashTable.Node']] = [None] * capacity  #Python list slot (bucket hold either empty or node)
 
-    def _hash(self, key):
-        return hash(key) % self.capacity
+    def _hash(self, key): #internal helper method to compute index
+        return hash(key) % self.capacity #reduce hash to valid bucket index between 0 and capacity
 
-    def insert(self, key, value):
-        index = self._hash(key)
-        new_node = self.Node(key, value)
+    def insert(self, key, value): #add key
+        index = self._hash(key) #computes bucket index
+        new_node = self.Node(key, value) #creates new node
         if self.table[index] is None:
             self.table[index] = new_node
         else:
-            current = self.table[index]
+            current = self.table[index] #If have collision, pass over linked list
             while True:
                 if current.key == key:
-                    current.value = value  # update existing
+                    current.value = value  # update with new value (prevent duplicate key)
                     return
                 if current.next is None:
                     break
@@ -38,8 +38,8 @@ class HashTable:
         current = self.table[index]
         while current:
             if current.key == key:
-                return current.value
-            current = current.next
+                return current.value #return stored value
+            current = current.next #continue the search
         return None
 
     def delete(self, key):
@@ -49,12 +49,12 @@ class HashTable:
         while current:
             if current.key == key:
                 if prev:
-                    prev.next = current.next
+                    prev.next = current.next #link prev.next to current.next (removes current)
                 else:
-                    self.table[index] = current.next
-                return True
-            prev = current
-            current = current.next
+                    self.table[index] = current.next #Update bucket head
+                return True #deletion successful
+            prev = current #set prev to current
+            current = current.next #move current to current.next
         return False
 
 
@@ -67,16 +67,16 @@ class BabyProduct:
         self.name = name
         self.category = category
         self.price = price
-        self.stock = stock
+        self.stock = stock #Attributes
 
     def __str__(self):
         return f"{self.name} ({self.category}) - RM{self.price:.2f}, Stock: {self.stock}"
-
+#return human-readable string with price of two decimal places
 
 # ------------------------------
 # 3️⃣ Local Storage / Pre-defined Products
 # ------------------------------
-inventory = HashTable(capacity=10)
+inventory = HashTable(capacity=10) #create 10 buckets
 
 predefined_products = [
     BabyProduct("P001", "Baby Shampoo", "Bath", 12.5, 50),
@@ -86,7 +86,7 @@ predefined_products = [
 
 # FIX VARIABLE SHADOWING
 for prod in predefined_products:
-    inventory.insert(prod.pid, prod)
+    inventory.insert(prod.pid, prod) #ensuring loop variable name doesn't shadow
 
 
 # ------------------------------
@@ -126,10 +126,10 @@ def menu():
                 category = input(f"New Category [{product.category}]: ") or product.category
 
                 price = input(f"New Price [{product.price}]: ")
-                price = float(price) if price else product.price
+                price = float(price) if price else product.price #input returns string. If non-empty, convert to float/int, otherwise reuse existing value
 
                 stock = input(f"New Stock [{product.stock}]: ")
-                stock = int(stock) if stock else product.stock
+                stock = int(stock) if stock else product.stock #input returns string. If non-empty, convert to float/int, otherwise reuse existing value
 
                 inventory.insert(pid, BabyProduct(pid, name, category, price, stock))
                 print("Product updated successfully.")
@@ -142,10 +142,10 @@ def menu():
 
         elif choice == "5":
             print("\n--- All Products ---")
-            for i in range(inventory.capacity):
-                current = inventory.table[i]
+            for i in range(inventory.capacity): #iterates through every bucket index (0..capacity-1)
+                current = inventory.table[i]#for each bucket walks the linked list printing ID: {key}, {value}
                 while current:
-                    print(f"ID: {current.key}, {current.value}")
+                    print(f"ID: {current.key}, {current.value}") #current.value calls BabyProduct.__str__ so product printed nicely
                     current = current.next
 
         elif choice == "6":
